@@ -94,3 +94,136 @@ there is one document, not five integrations.
 *ProjectCraft* — the project-management member of the ArtCraft family:
 one open tool for planning, scheduling, working and reporting, without
 the seams.
+
+---
+
+## Research: feature landscape
+
+What the incumbents actually ship, and where the opening is.
+
+- **Jira** — custom issue types/fields/statuses, visual workflow engine,
+  scrum + kanban boards (estimation, velocity, burndown, WIP limits,
+  swimlanes), roadmaps, releases, JQL, dashboards, automation rules,
+  huge marketplace. *Complaints:* bureaucratic complexity, needs a
+  dedicated admin, hostile to non-devs, per-seat pricing, forced
+  cloud migration (Jira Data Center EOL March 2029 is a real deadline
+  driver).
+- **monday.com** — board→group→item hierarchy, 30+ column types, many
+  views (table, kanban, Gantt with critical path & baseline, workload,
+  forms), dashboards, automations. *Complaints:* no real scheduling —
+  due dates ignore capacity and dependencies; automation action quotas;
+  no offline or self-host.
+- **Asana** — clean UX, goals/OKRs, portfolios, workload, workflow
+  builder. *Complaints:* no true scheduling engine (dependencies don't
+  auto-reschedule, no levelling); time tracking and reporting gated to
+  expensive tiers.
+- **ClickUp** — deep hierarchy, 15+ views, native docs, native time
+  tracking, 50+ dashboard widgets. *Complaints:* slowness at scale
+  (the Gantt especially), feature overload, notification noise.
+- **Microsoft Project** — the gold-standard scheduling engine: CPM
+  forward/backward pass, four dependency types with leads/lags,
+  constraints and calendars, baselines + variance, resource levelling,
+  earned value (SPI/CPI/EAC). *Complaints:* dated UI, Windows-only,
+  expensive, no real collaboration, agile bolted on.
+
+**The cross-cutting grievance:** per-seat SaaS pricing plus cloud
+lock-in — and every work-manager ships a fake Gantt while MS Project
+ships real scheduling with no collaboration. Nobody covers both.
+
+### The union checklist
+
+Planning (WBS, custom fields, milestones, goals, portfolios, docs,
+templates, intake forms) · Scheduling (Gantt, CPM, FS/SS/FF/SF +
+leads/lags, constraints, calendars, baselines + variance, critical
+path) · Agile (backlog, sprints, points, velocity, burndown, boards)
+· Resources (pool with calendars and cost rates, units %, workload
+heatmaps, levelling) · Time (timers, actuals vs estimates, timesheets)
+· Reporting (cross-project rollups, EVM, saved-filter query language)
+· Automation (trigger–condition–action, recurring tasks, webhooks)
+· Interop (`.mpp`, Jira CSV/JSON, full API) · Admin (roles, guests,
+audit, offline).
+
+### Hardest problems, honestly ranked
+
+1. **Incremental scheduling** — CPM itself is O(V+E), but real engines
+   need calendar-aware lags, SF/FF edges, constraints and *incremental*
+   reschedule on edit, not batch recompute.
+2. **Resource levelling** — RCPSP is NP-hard; MS Project's is a
+   proprietary black box. Ship priority-rule heuristics that produce
+   *sensible* results with user-visible explanations.
+3. **Real-time collaboration** — the deepest architectural commitment
+   (see below); it shapes the data layer, so decide it first.
+
+## Research: user journeys
+
+Six personas the product must serve, and what each demands.
+
+- **Project manager / PMO lead.** Plan (WBS → estimates → dependencies
+  → assign → baseline), track (actuals vs baseline → variance →
+  critical path → re-plan), report (status digest for steering).
+  *Today they keep the same plan twice — Jira for the team, `.mpp` or
+  Excel for the PMO — and the copies drift within a week.* One document,
+  both views, kills the duplication.
+- **Team member.** A keyboard-first **"My Work"** inbox aggregating
+  assignments across all projects; one-click status transitions;
+  minimal required fields. *Jira's forms make updating the ticket
+  slower than doing the work* — friction here kills adoption.
+- **Scrum master.** Refine backlog (stack-rank, split, estimate, DoD) →
+  plan sprint to capacity → run the board (swimlanes, WIP limits) →
+  burndown/velocity review → unfinished work rolls back automatically.
+  Lightweight automations ("close parent when subtasks done") come free
+  from the command engine.
+- **Resource manager.** Portfolio-wide workload heatmap → what-if
+  sandbox (model reallocation without touching the live plan) →
+  forecast demand by role/skill. *Capacity data is siloed everywhere
+  else — the heatmap answers "can we take this on?" in one look.*
+- **Executive / portfolio stakeholder.** RAG rollup of all initiatives
+  → drill into the red ones → exception alerts (schedule variance >10%)
+  → scheduled email digest. *Free read-only access — execs will never
+  buy a seat or learn the tool.*
+- **External guest / client.** Item-scoped sharing: a client sees a
+  curated milestone view and can comment/approve; contractors see only
+  their tasks; intake forms land in a triage inbox. *Per-seat guest
+  pricing is the incumbents' hidden tax — local-first makes free
+  guests natural.*
+
+**Cross-cutting implication:** one data model — a task is a WBS node,
+a board card and a backlog item simultaneously — and every journey
+above is expressible as CLI/MCP commands.
+
+## Research: collaboration model
+
+The incumbents force a binary choice — Jira-class multiplayer *or*
+file ownership. Local-first's wedge is offering both.
+
+**Recommendation: Automerge document + dumb relay server.**
+
+- **Store:** `.projectcraft` as an [Automerge](https://automerge.org)
+  binary document — Rust-native, WASM-compatible, proven sync protocol.
+  Every engine command mutates the doc as one change; undo/redo and the
+  activity feed fall out of the change history for free. (Loro is the
+  faster alternative worth benchmarking.)
+- **Solo mode:** file only, full history, zero infrastructure, works
+  fully offline. Git-exportable snapshot for backup.
+- **Team mode:** self-hosted `projectcraft-sync` — a single-binary
+  WebSocket relay persisting change-sets to SQLite. It's a **mailbox,
+  not a database**: no application logic, so it can't corrupt data and
+  any peer can restore it. Deploy = one Docker image.
+- **Permissions (server-enforced):** Owner / Editor / Commenter /
+  Viewer (read-only sync) / Guest (single project). The server checks
+  tokens before relaying changes; the UI also hides disallowed
+  commands.
+- **Social layer:** comments, mentions and reactions are ordinary CRDT
+  collections inside the doc — they sync and merge like tasks.
+  Notifications = clients watching the change stream; presence
+  (cursors/avatars) ships last, over ephemeral messages.
+- **Offline:** every peer holds the whole doc. Disconnect → keep
+  editing; reconnect → sync converges automatically.
+
+**Known risks:** semantic conflicts survive CRDTs (two people
+rescheduling the same task merges cleanly but may produce an impossible
+plan — flag violations in the activity feed post-merge instead of
+rejecting); history growth needs compaction + shallow snapshots for
+new joiners; the change DAG doubles as the enterprise audit log.
+**Avoid:** a custom CRDT, business logic in the server, and binary
+file-sharing as anything but an export path.
