@@ -21,7 +21,7 @@ as fluently as a human can click it.
 ### The creative tools (Adobe-class)
 
 | App | Discipline | Reference |
-|-----|-----------|-----------|
+| --- | --- | --- |
 | **PhotoCraft** | Image editing — layers, masks, adjustments, real PSD | Photoshop |
 | **VectorCraft** | Vector illustration — paths, type, `.ai` | Illustrator |
 | **DesignCraft** | Page layout and publishing | InDesign |
@@ -35,7 +35,7 @@ as fluently as a human can click it.
 ### The office tools (Microsoft-class)
 
 | App | Discipline | Reference |
-|-----|-----------|-----------|
+| --- | --- | --- |
 | **WordCraft** | Writing and document design, `.docx` | Word |
 | **GridCraft** | Spreadsheets — formulas, charts, `.xlsx` | Excel |
 | **DeckCraft** | Presentations — slides, charts, `.pptx` | PowerPoint |
@@ -43,7 +43,7 @@ as fluently as a human can click it.
 ### The technical tools
 
 | App | Discipline | Reference |
-|-----|-----------|-----------|
+| --- | --- | --- |
 | **MatCraft** | Numerical computing, `.m`-language engine | MATLAB |
 | **TexCraft** | LaTeX authoring and typesetting, live PDF | Overleaf-class |
 | **ScreenCraft** | Screen recording with automatic zooms and captions | Screen Studio |
@@ -51,7 +51,7 @@ as fluently as a human can click it.
 ### The platform underneath
 
 | Repo | Role |
-|------|------|
+| --- | --- |
 | **craft-launcher** | Installs, updates and launches the suite — native egui desktop app, same Rust compiled to WASM for the web |
 | **craft-libs** | Shared Rust libraries (atomic file I/O, ICC colour management, printing…) used by every app |
 | **craft-fonts** | The suite's font assets, kept out of the app repos |
