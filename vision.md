@@ -1,24 +1,30 @@
 # ProjectsCraft — Vision
 
-An open creative suite, rebuilt from scratch in Rust — and a playground
-that proves the whole suite can produce real work end to end.
+Real projects, built entirely with the ArtCraft suite — proving that an
+open, Rust-native creative toolchain can carry a complete professional
+pipeline.
+
+> **Attribution.** The Craft apps and the ArtCraft suite are developed by
+> **[storytold](https://github.com/storytold)** — the official source.
+> ProjectsCraft is an independent companion effort: it uses, exercises
+> and contributes back to the suite; it does not develop the apps
+> themselves.
 
 ## The idea
 
-Every professional creative discipline has a dominant proprietary tool.
-ProjectsCraft gathers the family of clean-room, open-source
-reimplementations of those tools — the **Craft apps** — and the shared
-infrastructure that makes them feel like one suite rather than a dozen
-separate programs.
+The ArtCraft suite reimplements the industry's dominant creative, office
+and technical tools as clean-room, open-source, Rust-native apps —
+offline, memory-safe, and designed to be driven by agents as fluently
+as by humans.
 
-Each app is native, offline, memory-safe, and written entirely in Rust.
-Each reads and writes the file formats its proprietary counterpart made
-the industry standard. Each is built so that an AI agent can drive it
-as fluently as a human can click it.
+A suite claim like that needs evidence, not just repos. **ProjectsCraft
+is the evidence layer**: a series of real, reproducible projects that
+drive the tools end to end through their CLIs — the way a professional
+studio would use them, and the way an autonomous agent would.
 
-## The suite
+## The suite being exercised
 
-### The creative tools (Adobe-class)
+### Creative tools (Adobe-class)
 
 | App | Discipline | Reference |
 | --- | --- | --- |
@@ -32,7 +38,7 @@ as fluently as a human can click it.
 | **PdfCraft** | The PDF workbench — combine, bookmark, preflight | Acrobat |
 | **CADCraft** | Computer-aided drafting, `.dxf` | AutoCAD |
 
-### The office tools (Microsoft-class)
+### Office tools (Microsoft-class)
 
 | App | Discipline | Reference |
 | --- | --- | --- |
@@ -40,7 +46,7 @@ as fluently as a human can click it.
 | **GridCraft** | Spreadsheets — formulas, charts, `.xlsx` | Excel |
 | **DeckCraft** | Presentations — slides, charts, `.pptx` | PowerPoint |
 
-### The technical tools
+### Technical tools
 
 | App | Discipline | Reference |
 | --- | --- | --- |
@@ -48,76 +54,54 @@ as fluently as a human can click it.
 | **TexCraft** | LaTeX authoring and typesetting, live PDF | Overleaf-class |
 | **ScreenCraft** | Screen recording with automatic zooms and captions | Screen Studio |
 
-### The platform underneath
+### Platform
 
 | Repo | Role |
 | --- | --- |
 | **craft-launcher** | Installs, updates and launches the suite — native egui desktop app, same Rust compiled to WASM for the web |
 | **craft-libs** | Shared Rust libraries (atomic file I/O, ICC colour management, printing…) used by every app |
-| **craft-fonts** | The suite's font assets, kept out of the app repos |
+| **craft-fonts** | The suite's font assets |
 
-## The principles
+## Why a projects repo
 
-The apps are different; the way they are built is the same. That is the
-point of the suite.
+- **Dogfooding at suite scale.** Each app's repo proves the app;
+  ProjectsCraft proves the *suite* — that assets, formats and intent
+  flow across tools the way a real production pipeline needs.
+- **Reproducible by construction.** Every project is a self-contained
+  directory with a `build.py` that regenerates its native project file
+  and publication exports from the CLIs alone.
+- **Agent-first.** Because every action in every Craft app is a command
+  (engine → CLI → control channel → MCP), these projects double as a
+  benchmark for how far an agent can drive the whole suite unaided.
+- **A learning trail.** Captured command catalogs and per-tool notes
+  show what works, what's missing, and what to contribute upstream.
 
-- **Clean-room.** Behaviour and look are studied, never copied.
-  Implementations come from public specifications, published algorithms
-  and papers — PSD spec, ICC, ISO 32000, Knuth–Plass. No proprietary
-  code, assets, profiles or GPL-licensed alternatives.
-- **Rust only.** No Tauri, Electron or webview shells. The desktop app is
-  native egui/eframe; the web build is the same Rust compiled to
-  WebAssembly. Memory safety and fearless concurrency are free.
-- **Never crash.** A corrupt file, a hostile input, a full disk must
-  produce an actionable error, never a panic. Enforced by clippy lints:
-  no `unwrap`, `expect`, `panic` or `unsafe` in non-test code.
-- **Everything is a command.** Every user-visible action is a command in
-  the engine — reachable identically from menus, the headless CLI, the
-  TCP control channel and MCP. The UI is thin; agents are first-class
-  users, not an afterthought.
-- **Layered architecture.** A shared crate skeleton — geometry and colour
-  at L0, document model and engines in the middle, UI at the top —
-  enforced mechanically by `cargo xtask layers`.
-- **Native files, real exports.** Each app keeps its own project format
-  *and* reads/writes the industry's interchange formats, so work is
-  never trapped and never needs a subscription to reopen.
-- **Runs everywhere.** macOS, Windows, Linux, FreeBSD natively; the
-  browser via WASM.
+## Campaign 01: LUMA AURA
 
-## The proof: a whole campaign from the CLIs
-
-**PlaygroundCraft** is the working demonstration: a complete
-product-launch campaign for **LUMA AURA** (adaptive ambient lighting,
-*See light differently*) — twelve projects, one per creative app, all
-produced by driving the command-line interfaces:
+The first exercise: a complete product-launch campaign for **LUMA AURA**
+— adaptive ambient lighting, *See light differently* — twelve projects,
+one per creative tool:
 
 brand identity → hero poster → product photo library → brochure →
 press release → investor deck → launch budget → trade-show booth plan →
 promo track → promo video → logo sting → combined press-kit PDF.
 
-Every project is a self-contained directory with a `build.py` that
-reproduces its native project file and its publication exports. It is
-both a test of the tools and a template for what a connected open suite
-makes possible.
+Every deliverable built headlessly from the command-line interfaces.
+
+## Contribution loop
+
+Work here feeds back into the suite: gaps found during real projects
+become issues, fixes and features land through the forks under
+`NibrasAz7`, and reusable learnings go to the shared `craftrules`
+standards. Localization work (full Arabic/RTL UI) is developed the same
+way — proven in projects first, contributed upstream second.
 
 ## Where this is going
 
-- **Parity, then beyond.** Each app tracks a measured parity score
-  against its reference (menus, files, behaviour, performance). The near
-  goal is 1:1 coverage; the real goal is better — faster, safer, scriptable.
-- **One agent vocabulary.** Because every action in every app is a
-  command, a single agent can plan a deliverable and execute it across
-  raster, vector, layout, motion, sound, documents, sheets, CAD, math
-  and typesetting — the whole pipeline, no human handoffs required.
-- **A platform others can build on.** `craft-libs` crates are designed to
-  outgrow the suite; anything broadly useful (RAW support, colour
-  management, printing) can be promoted into its own library for the
-  wider ecosystem.
-- **Open by default.** MIT OR Apache-2.0 code, licensed assets with full
-  attribution, reproducible builds, public roadmaps.
-
-## The name
-
-*ProjectsCraft* is the umbrella: the collection of the Craft apps, the
-shared platform beneath them, and the playground that shows what they
-can do together.
+- **More campaigns.** One domain per exercise: scientific publishing
+  (TexCraft + MatCraft + GridCraft), broadcast package, conference
+  booth-to-video pipeline, documentation sets.
+- **Deeper agent coverage.** Each campaign pushes the boundary of what a
+  single agent can ship without human handoffs.
+- **A public record.** Open deliverables, open build scripts, open notes
+  — a template others can copy to validate or extend the suite.
