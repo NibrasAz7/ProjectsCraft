@@ -1,107 +1,96 @@
-# ProjectsCraft — Vision
+# ProjectCraft — Vision
 
-Real projects, built entirely with the ArtCraft suite — proving that an
-open, Rust-native creative toolchain can carry a complete professional
-pipeline.
+A complete, open-source project-management suite — the clean-room,
+Rust-native alternative to **Jira, monday.com, Asana, ClickUp and
+Microsoft Project** in a single tool.
 
-> **Attribution.** The Craft apps and the ArtCraft suite are developed by
-> **[storytold](https://github.com/storytold)** — the official source.
-> ProjectsCraft is an independent companion effort: it uses, exercises
-> and contributes back to the suite; it does not develop the apps
-> themselves.
+> Built the **ArtCraft** way: the engineering conventions, layering and
+> product standards of the [storytold](https://github.com/storytold)
+> Craft app suite. ProjectCraft follows that vision and contributes back
+> to it; the suite itself is developed by storytold.
 
-## The idea
+## The problem
 
-The ArtCraft suite reimplements the industry's dominant creative, office
-and technical tools as clean-room, open-source, Rust-native apps —
-offline, memory-safe, and designed to be driven by agents as fluently
-as by humans.
+Project management software is fragmented along the exact lines teams
+don't work along:
 
-A suite claim like that needs evidence, not just repos. **ProjectsCraft
-is the evidence layer**: a series of real, reproducible projects that
-drive the tools end to end through their CLIs — the way a professional
-studio would use them, and the way an autonomous agent would.
+- **Issue trackers** (Jira) do agile boards and workflows but are heavy,
+  cloud-locked and hostile to scheduling.
+- **Work managers** (monday.com, Asana, ClickUp) do friendly views and
+  automations but crumble on real dependencies, baselines and capacity.
+- **Schedulers** (Microsoft Project) do CPM, levelling and baselines but
+  are alien to everyone who isn't a certified planner.
 
-## The suite being exercised
+Teams stitch all three together with exports, plugins and sync jobs —
+and pay per seat for the privilege of having their own data trapped in
+someone else's cloud.
 
-### Creative tools (Adobe-class)
+## The product
 
-| App | Discipline | Reference |
-| --- | --- | --- |
-| **PhotoCraft** | Image editing — layers, masks, adjustments, real PSD | Photoshop |
-| **VectorCraft** | Vector illustration — paths, type, `.ai` | Illustrator |
-| **DesignCraft** | Page layout and publishing | InDesign |
-| **LightCraft** | Photo library and raw development | Lightroom |
-| **FilmCraft** | Video editing, colour, sound | Premiere Pro |
-| **EffectCraft** | Motion graphics and visual effects | After Effects |
-| **SoundCraft** | Audio recording, editing, mixing | Pro Tools |
-| **PdfCraft** | The PDF workbench — combine, bookmark, preflight | Acrobat |
-| **CADCraft** | Computer-aided drafting, `.dxf` | AutoCAD |
+**One engine, every lens.** ProjectCraft holds a single project model —
+work items, dependencies, resources, calendars, estimates, baselines —
+and renders it through every view the incumbents split into separate
+products:
 
-### Office tools (Microsoft-class)
-
-| App | Discipline | Reference |
-| --- | --- | --- |
-| **WordCraft** | Writing and document design, `.docx` | Word |
-| **GridCraft** | Spreadsheets — formulas, charts, `.xlsx` | Excel |
-| **DeckCraft** | Presentations — slides, charts, `.pptx` | PowerPoint |
-
-### Technical tools
-
-| App | Discipline | Reference |
-| --- | --- | --- |
-| **MatCraft** | Numerical computing, `.m`-language engine | MATLAB |
-| **TexCraft** | LaTeX authoring and typesetting, live PDF | Overleaf-class |
-| **ScreenCraft** | Screen recording with automatic zooms and captions | Screen Studio |
-
-### Platform
-
-| Repo | Role |
+| Capability | Replaces |
 | --- | --- |
-| **craft-launcher** | Installs, updates and launches the suite — native egui desktop app, same Rust compiled to WASM for the web |
-| **craft-libs** | Shared Rust libraries (atomic file I/O, ICC colour management, printing…) used by every app |
-| **craft-fonts** | The suite's font assets |
+| Issues, epics, custom fields, workflows, sprint boards, backlogs | Jira |
+| Table, board, calendar, dashboard views; automations; docs-lite | monday.com / Asana / ClickUp |
+| Gantt, critical path, predecessors/constraints, baselines, resource levelling | Microsoft Project |
+| Portfolio roll-ups across projects, workload heatmaps | all of them, badly |
 
-## Why a projects repo
+A task on a kanban card, a bar on a Gantt and a line in a cost report are
+the same object — change it anywhere and every view agrees, because
+there is one document, not five integrations.
 
-- **Dogfooding at suite scale.** Each app's repo proves the app;
-  ProjectsCraft proves the *suite* — that assets, formats and intent
-  flow across tools the way a real production pipeline needs.
-- **Reproducible by construction.** Every project is a self-contained
-  directory with a `build.py` that regenerates its native project file
-  and publication exports from the CLIs alone.
-- **Agent-first.** Because every action in every Craft app is a command
-  (engine → CLI → control channel → MCP), these projects double as a
-  benchmark for how far an agent can drive the whole suite unaided.
-- **A learning trail.** Captured command catalogs and per-tool notes
-  show what works, what's missing, and what to contribute upstream.
+## The ArtCraft way
 
-## Campaign 01: LUMA AURA
+- **Rust only.** Native egui/eframe desktop app; the same Rust compiled
+  to WebAssembly for the web. No Electron, no webview shell.
+- **Clean-room.** Behaviour is designed from public specifications,
+  published scheduling algorithms (CPM, PERT, resource levelling) and
+  observed UX — never copied code, assets or proprietary formats.
+- **Never crash.** No panics, no `unsafe`; untrusted project files and
+  imports are hostile input — every failure is a `Result` the user can
+  act on.
+- **Everything is a command.** Every action — create a task, set a
+  dependency, rebaseline, level resources — is a command in the engine,
+  reachable identically from the UI, `projectcraft-cli`, the control
+  channel and MCP. Agents are first-class users.
+- **Local-first.** A project is a folder; the native `.projectcraft`
+  file is yours. Offline by default; sync is a feature, not a ransom.
+- **No format traps.** Import and export the real interchange formats —
+  CSV, Jira JSON/XML, `.mpp`/`MPXJ`-class schedules, iCalendar — so
+  arriving and leaving are both free.
 
-The first exercise: a complete product-launch campaign for **LUMA AURA**
-— adaptive ambient lighting, *See light differently* — twelve projects,
-one per creative tool:
+## What "complete" means
 
-brand identity → hero poster → product photo library → brochure →
-press release → investor deck → launch budget → trade-show booth plan →
-promo track → promo video → logo sting → combined press-kit PDF.
+1. **Plan** — WBS, milestones, phases; effort and duration estimates.
+2. **Schedule** — finish-start/finish-finish/start-start dependencies,
+   constraints, calendars, critical path, slack, baselines and variance.
+3. **Work** — kanban/scrum boards, sprints, backlogs, custom fields,
+   workflow states, subtasks, checklists.
+4. **Resource** — people, skills, availability calendars, allocation,
+   levelling, workload heatmaps.
+5. **Track** — time logging, actuals vs baseline, earned value
+   (EV/PV/AC, SPI/CPI).
+6. **Report** — burndowns, Gantt exports, portfolio dashboards,
+   saved filters, printable reports.
+7. **Automate** — rules ("when state → done, notify owner"), templates,
+   recurring tasks.
 
-Every deliverable built headlessly from the command-line interfaces.
+## Milestone sketch
 
-## Contribution loop
+- **M0 — Core model + table/board.** Work items, fields, WBS, saved views.
+- **M1 — Scheduling engine.** Dependencies, calendars, CPM, Gantt view.
+- **M2 — Agile.** Sprints, backlogs, boards, burndown.
+- **M3 — Resources & EVM.** Levelling, workload, baselines, earned value.
+- **M4 — Interop.** Jira/CSV/MPP import-export, `.projectcraft` format frozen.
+- **M5 — Everywhere.** Web app (WASM), collaboration, packaging per the
+  ArtCraft release conventions.
 
-Work here feeds back into the suite: gaps found during real projects
-become issues, fixes and features land through the forks under
-`NibrasAz7`, and reusable learnings go to the shared `craftrules`
-standards. Localization work (full Arabic/RTL UI) is developed the same
-way — proven in projects first, contributed upstream second.
+## The name
 
-## Where this is going
-
-- **More campaigns.** One domain per exercise: scientific publishing
-  (TexCraft + MatCraft + GridCraft), broadcast package, conference
-  booth-to-video pipeline, documentation sets.
-- **Deeper agent coverage.** Each campaign pushes the boundary of what a
-  single agent can ship without human handoffs.
-- **A public record.** Open deliverables, open build scripts, open notes
-  — a template others can copy to validate or extend the suite.
+*ProjectCraft* — the project-management member of the ArtCraft family:
+one open tool for planning, scheduling, working and reporting, without
+the seams.
