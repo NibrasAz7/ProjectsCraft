@@ -1,0 +1,15 @@
+[package]
+name = "pmformat"
+description = "ProjectCraft L2 interop and rendering: .projectcraft JSON, CSV, Jira JSON, MSPDI XML, Primavera .xer, Gantt SVG and HTML reports."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+pmcore = { path = "../pmcore" }
+pmsched = { path = "../pmsched" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

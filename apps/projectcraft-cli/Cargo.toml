@@ -1,0 +1,18 @@
+[package]
+name = "projectcraft-cli"
+description = "Headless ProjectCraft CLI: schedule, level resources, compute EVM, run Monte Carlo, export SVG/HTML/MSPDI/XER/CSV/Jira, and serve MCP."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "projectcraft-cli"
+path = "src/main.rs"
+
+[dependencies]
+projectcraft_engine = { path = "../../crates/engine" }
+projectcraft_mcp = { path = "../../crates/mcp" }
+serde_json = "1"

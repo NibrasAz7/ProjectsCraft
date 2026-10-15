@@ -1,0 +1,13 @@
+[package]
+name = "pmcore"
+description = "ProjectCraft L0 core model: WBS, work items, dependencies, constraints, calendars, resources, sprints, baselines."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

@@ -60,40 +60,47 @@ there is one document, not five integrations.
 - **Local-first.** A project is a folder; the native `.projectcraft`
   file is yours. Offline by default; sync is a feature, not a ransom.
 - **No format traps.** Import and export the real interchange formats —
-  CSV, Jira JSON/XML, `.mpp`/`MPXJ`-class schedules, iCalendar — so
-  arriving and leaving are both free.
+  CSV, PDF, Jira JSON/XML, `.mpp`/MSPDI XML schedules, Primavera P6 `.xer`
+  exchange, iCalendar — so arriving and leaving are both free.
 
 ## What "complete" means
 
 1. **Plan** — WBS, milestones, phases; effort and duration estimates.
-2. **Schedule** — finish-start/finish-finish/start-start dependencies,
-   constraints, calendars, critical path, slack, baselines and variance.
+2. **Schedule** — finish-start/finish-finish/start-start/start-finish
+   dependencies with leads and lags, constraints, custom calendars,
+   critical path, slack, baselines, baseline-vs-actual variance, and
+   background Monte Carlo schedule-risk simulation.
 3. **Work** — kanban/scrum boards, sprints, backlogs, custom fields,
    workflow states, subtasks, checklists.
-4. **Resource** — people, skills, availability calendars, allocation,
-   levelling, workload heatmaps.
-5. **Track** — time logging, actuals vs baseline, earned value
-   (EV/PV/AC, SPI/CPI).
-6. **Report** — burndowns, Gantt exports, portfolio dashboards,
+4. **Resource** — people, skills, availability calendars, multiple
+   resource assignments, over-allocation warnings, automatic levelling,
+   workload heatmaps.
+5. **Track** — time logging, rate tables, fixed task costs, cost curves,
+   actuals vs baseline, earned value (EV/PV/AC, SV/CV, SPI/CPI, EAC).
+6. **Report** — burndowns, Gantt PDF/CSV exports, portfolio dashboards,
    saved filters, printable reports.
 7. **Automate** — rules ("when state → done, notify owner"), templates,
-   recurring tasks.
+   recurring tasks, CLI and MCP automation.
 
 ## Milestone sketch
 
 - **M0 — Core model + table/board.** Work items, fields, WBS, saved views.
-- **M1 — Scheduling engine.** Dependencies, calendars, CPM, Gantt view.
+- **M1 — Scheduling engine.** Dependencies, calendars, parallel CPM (10k+
+  tasks), responsive 60 FPS Gantt view, Monte Carlo risk simulation.
 - **M2 — Agile.** Sprints, backlogs, boards, burndown.
-- **M3 — Resources & EVM.** Levelling, workload, baselines, earned value.
-- **M4 — Interop.** Jira/CSV/MPP import-export, `.projectcraft` format frozen.
+- **M3 — Resources & EVM.** Rate tables, fixed costs, cost curves,
+  levelling, workload, baselines, earned value (SV/CV/SPI/CPI).
+- **M4 — Interop.** Jira/CSV/PDF/MPP/MSPDI XML/Primavera `.xer`
+  import-export, `.projectcraft` format frozen.
 - **M5 — Everywhere.** Web app (WASM), collaboration, packaging per the
   ArtCraft release conventions.
 
 ## The name
 
-*ProjectCraft* — the project-management member of the ArtCraft family:
-one open tool for planning, scheduling, working and reporting, without
-the seams.
+*ProjectCraft* (or *GanttCraft*, per the Remade `microsoft-project`
+request's `suggested_names`) — the project-management member of the
+ArtCraft family: one open tool for planning, scheduling, working and
+reporting, without the seams.
 
 ---
 

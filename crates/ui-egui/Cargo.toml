@@ -1,0 +1,27 @@
+[package]
+name = "projectcraft-ui-egui"
+description = "ProjectCraft L6 Studio UI (egui): Table/WBS, Gantt, Kanban Board, Resource Workload, EVM & Monte Carlo Risk."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+name = "projectcraft_ui_egui"
+path = "src/lib.rs"
+
+[dependencies]
+pmcore = { path = "../pmcore" }
+pmsched = { path = "../pmsched" }
+pmformat = { path = "../pmformat" }
+projectcraft_engine = { path = "../engine" }
+egui = "0.36"
+eframe = "0.36"
+serde_json = "1"
+base64 = "0.22"
+png = "0.18"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+rfd = "0.17"

@@ -1,0 +1,14 @@
+[package]
+name = "pmsched"
+description = "ProjectCraft L1 scheduling, resource levelling, EVM, and Monte Carlo risk engine."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+pmcore = { path = "../pmcore" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
