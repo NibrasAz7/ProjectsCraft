@@ -18,6 +18,7 @@ ANSI/EIA-748 Earned Value Management (`PV`, `EV`, `AC`, `SV`, `CV`, `SPI`,
 and core scheduling/agile/resource/EVM/interop crates are in place.
 
 **What works today:**
+
 - **Core project model (`pmcore`):** WBS hierarchy, work items (`task`,
   `milestone`, `phase`, `epic`, `story`, `bug`), custom fields, workflow
   statuses (`backlog`, `todo`, `in_progress`, `blocked`, `review`, `done`),
@@ -44,6 +45,7 @@ and core scheduling/agile/resource/EVM/interop crates are in place.
   `projectcraft-cli mcp`.
 
 **Honest limitations (not yet implemented):**
+
 - Binary `.mpp` OLE container parsing is not yet implemented (use Microsoft
   Project MSPDI `.xml` or Primavera `.xer` for schedule interchange).
 - Real-time multiplayer CRDT sync (`Automerge` relay) and WASM web packaging
