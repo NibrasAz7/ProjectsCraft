@@ -11,4 +11,11 @@ all views over the same document, local-first and agent-drivable.
 Built the [ArtCraft](https://github.com/storytold) way — the suite's
 conventions, not the suite's code.
 
+**Status: pre-implementation.** This repository currently contains the
+product vision and research only — no working code yet. It exists to
+define scope before building.
+
 Read **[vision.md](vision.md)** for the full vision.
+
+License: MIT OR Apache-2.0 ([LICENSE-MIT](LICENSE-MIT),
+[LICENSE-APACHE](LICENSE-APACHE)).
