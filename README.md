@@ -51,8 +51,10 @@ and core scheduling/agile/resource/EVM/interop crates are in place.
 - Real-time multiplayer CRDT sync (`Automerge` relay) and WASM web packaging
   are planned for M6.
 
-Read **[vision.md](vision.md)** for the product vision and
-**[ROADMAP.md](ROADMAP.md)** for milestone status.
+Read **[vision.md](vision.md)** for the product vision,
+**[ROADMAP.md](ROADMAP.md)** for milestone status,
+**[docs/architecture.md](docs/architecture.md)** for the crate layering, and
+**[docs/gaps.md](docs/gaps.md)** for known compatibility gaps.
 
 ## Quick start
 
