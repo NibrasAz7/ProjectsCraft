@@ -7,4 +7,4 @@ ClickUp, Microsoft or Oracle are used.
 
 | Path | Author | Source | License | Notes |
 | --- | --- | --- | --- | --- |
-| *(none yet — all visuals and SVG Gantt charts are generated procedurally in Rust)* | NibrasAz7 | Original code | MIT OR Apache-2.0 | Add a row here before committing any icon, font, or sample asset. |
+| `assets/app-icon/projectcraft-*.png`, `assets/app-icon/projectcraft.ico` | NibrasAz7 | Procedurally generated in code (three-bar Gantt & status-line motif on slate) | MIT OR Apache-2.0 | Original procedural artwork; regenerate from code, never copied. |

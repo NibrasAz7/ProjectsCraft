@@ -12,5 +12,6 @@ workspace = true
 pmcore = { path = "../pmcore" }
 pmsched = { path = "../pmsched" }
 pmformat = { path = "../pmformat" }
+pmsync = { path = "../pmsync" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

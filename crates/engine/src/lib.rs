@@ -20,6 +20,7 @@ use pmsched::{
     compute_baseline_variance, compute_evm, compute_sprint_burndown, compute_workload, level_resources, run_monte_carlo, schedule_project,
     MonteCarloReport, SchedError,
 };
+use pmsync::{SyncBundle, SyncError, SyncRole};
 use serde_json::{json, Value as Json};
 
 /// Errors returned by engine commands — always structured, never a crash.
@@ -30,6 +31,7 @@ pub enum EngineError {
     Core(CoreError),
     Sched(SchedError),
     Format(FormatError),
+    Sync(SyncError),
     Io(String),
     Panic(String),
 }
@@ -48,6 +50,7 @@ impl fmt::Display for EngineError {
             EngineError::Core(e) => write!(f, "{e}"),
             EngineError::Sched(e) => write!(f, "{e}"),
             EngineError::Format(e) => write!(f, "{e}"),
+            EngineError::Sync(e) => write!(f, "{e}"),
             EngineError::Io(e) => write!(f, "I/O error: {e}"),
             EngineError::Panic(id) => write!(f, "internal error in `{id}` (project state was rolled back)"),
         }
@@ -74,6 +77,12 @@ impl From<FormatError> for EngineError {
     }
 }
 
+impl From<SyncError> for EngineError {
+    fn from(e: SyncError) -> Self {
+        EngineError::Sync(e)
+    }
+}
+
 /// Static specification for one engine command.
 pub struct CommandSpec {
     pub id: &'static str,
@@ -83,7 +92,7 @@ pub struct CommandSpec {
 }
 
 /// Guarded ProjectCraft session owning the current [`Project`], undo/redo
-/// snapshots, and the most recent Monte Carlo report.
+/// snapshots, sync bundle, and the most recent Monte Carlo report.
 #[derive(Clone)]
 pub struct Session {
     project: Project,
@@ -91,6 +100,9 @@ pub struct Session {
     redo_stack: Vec<Project>,
     last_monte_carlo: Option<MonteCarloReport>,
     current_path: Option<String>,
+    sync_bundle: SyncBundle,
+    active_author: String,
+    active_role: SyncRole,
 }
 
 impl Default for Session {
@@ -105,11 +117,38 @@ impl Session {
         let mut project = Project::sample_launch_program();
         let _ = schedule_project(&mut project);
         let mc = run_monte_carlo(&project, 400, 42).ok();
-        Session { project, undo_stack: Vec::new(), redo_stack: Vec::new(), last_monte_carlo: mc, current_path: None }
+        Session {
+            project,
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
+            last_monte_carlo: mc,
+            current_path: None,
+            sync_bundle: SyncBundle::new(),
+            active_author: "local-owner".to_string(),
+            active_role: SyncRole::Owner,
+        }
     }
 
     pub fn empty(name: &str, code: &str) -> Self {
-        Session { project: Project::new(name, code), undo_stack: Vec::new(), redo_stack: Vec::new(), last_monte_carlo: None, current_path: None }
+        Session {
+            project: Project::new(name, code),
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
+            last_monte_carlo: None,
+            current_path: None,
+            sync_bundle: SyncBundle::new(),
+            active_author: "local-owner".to_string(),
+            active_role: SyncRole::Owner,
+        }
+    }
+
+    pub fn sync_bundle(&self) -> &SyncBundle {
+        &self.sync_bundle
+    }
+
+    pub fn set_identity(&mut self, author: impl Into<String>, role: SyncRole) {
+        self.active_author = author.into();
+        self.active_role = role;
     }
 
     pub fn project(&self) -> &Project {
@@ -423,6 +462,36 @@ const COMMANDS: &[CommandSpec] = &[
         label: "Render standalone HTML executive report",
         params: "{path?: string}",
         run: cmd_export_report_html,
+    },
+    CommandSpec {
+        id: "sync.add_comment",
+        label: "Add a synced comment with @mentions to a task",
+        params: "{task_id: number, body: string, author?: string, role?: string}",
+        run: cmd_sync_add_comment,
+    },
+    CommandSpec {
+        id: "sync.activity_feed",
+        label: "Return the change DAG audit log, comments, and post-merge conflict advisories",
+        params: "{}",
+        run: cmd_sync_activity_feed,
+    },
+    CommandSpec {
+        id: "sync.check_permission",
+        label: "Verify whether a role is permitted to run a command",
+        params: "{role: string, command: string}",
+        run: cmd_sync_check_permission,
+    },
+    CommandSpec {
+        id: "sync.export_bundle",
+        label: "Export the local sync change bundle as JSON",
+        params: "{path?: string}",
+        run: cmd_sync_export_bundle,
+    },
+    CommandSpec {
+        id: "sync.import_bundle",
+        label: "Merge a remote sync bundle and run post-merge conflict inspection",
+        params: "{bundle?: object, path?: string}",
+        run: cmd_sync_import_bundle,
     },
 ];
 
@@ -927,6 +996,60 @@ fn cmd_export_report_html(s: &mut Session, p: &Json) -> Result<Json, EngineError
     let html = render_report_html(&s.project);
     let written = maybe_write_path(p, &html)?;
     Ok(json!({"html": html, "path": written, "bytes": html.len()}))
+}
+
+fn cmd_sync_add_comment(s: &mut Session, p: &Json) -> Result<Json, EngineError> {
+    let tid = req_u32("sync.add_comment", p, "task_id")?;
+    let body = req_str("sync.add_comment", p, "body")?;
+    let author = p.get("author").and_then(Json::as_str).unwrap_or(&s.active_author).to_string();
+    let role = p.get("role").and_then(Json::as_str).map(SyncRole::parse).unwrap_or(s.active_role);
+    if s.project.task(tid).is_none() {
+        return Err(EngineError::Core(CoreError::NotFound(format!("task {tid}"))));
+    }
+    let comment = s.sync_bundle.add_comment(author, role, tid, body)?;
+    Ok(serde_json::to_value(comment).unwrap_or_else(|_| json!({})))
+}
+
+fn cmd_sync_activity_feed(s: &mut Session, _p: &Json) -> Result<Json, EngineError> {
+    let conflicts = s.sync_bundle.inspect_post_merge_conflicts(&mut s.project);
+    Ok(json!({
+        "head_change_id": s.sync_bundle.head_change_id,
+        "envelopes": s.sync_bundle.envelopes,
+        "comments": s.sync_bundle.comments,
+        "conflicts": conflicts,
+    }))
+}
+
+fn cmd_sync_check_permission(_s: &mut Session, p: &Json) -> Result<Json, EngineError> {
+    let role_str = req_str("sync.check_permission", p, "role")?;
+    let command = req_str("sync.check_permission", p, "command")?;
+    let role = SyncRole::parse(role_str);
+    let allowed = role.allows_command(command);
+    Ok(json!({"role": role.as_str(), "command": command, "allowed": allowed}))
+}
+
+fn cmd_sync_export_bundle(s: &mut Session, p: &Json) -> Result<Json, EngineError> {
+    let _ = s.sync_bundle.inspect_post_merge_conflicts(&mut s.project);
+    let text = serde_json::to_string_pretty(&s.sync_bundle).map_err(|e| EngineError::Io(e.to_string()))?;
+    let written = maybe_write_path(p, &text)?;
+    Ok(json!({"bundle": s.sync_bundle, "path": written, "bytes": text.len()}))
+}
+
+fn cmd_sync_import_bundle(s: &mut Session, p: &Json) -> Result<Json, EngineError> {
+    let remote: SyncBundle = if let Some(b) = p.get("bundle") {
+        serde_json::from_value(b.clone()).map_err(|e| EngineError::bad_params("sync.import_bundle", e.to_string()))?
+    } else {
+        let raw = read_text_or_path("sync.import_bundle", p, "json")?;
+        serde_json::from_str(&raw).map_err(|e| EngineError::bad_params("sync.import_bundle", e.to_string()))?
+    };
+    let merged = s.sync_bundle.merge_remote(&remote);
+    let conflicts = s.sync_bundle.inspect_post_merge_conflicts(&mut s.project);
+    Ok(json!({
+        "merged_envelopes": merged,
+        "total_envelopes": s.sync_bundle.envelopes.len(),
+        "total_comments": s.sync_bundle.comments.len(),
+        "conflicts": conflicts,
+    }))
 }
 
 #[cfg(test)]

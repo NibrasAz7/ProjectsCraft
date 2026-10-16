@@ -10,8 +10,9 @@ fn main() -> ExitCode {
         "test" => run(&["test", "--workspace"]),
         "clippy" => run(&["clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]),
         "layers" => layers(),
+        "wasm" => wasm(),
         other => {
-            eprintln!("unknown xtask '{other}' (have: ci, fmt, test, clippy, layers)");
+            eprintln!("unknown xtask '{other}' (have: ci, fmt, test, clippy, layers, wasm)");
             ExitCode::FAILURE
         }
     }
@@ -25,7 +26,32 @@ fn ci() -> ExitCode {
             return ExitCode::FAILURE;
         }
     }
-    layers()
+    if layers() != ExitCode::SUCCESS {
+        return ExitCode::FAILURE;
+    }
+    wasm()
+}
+
+fn wasm() -> ExitCode {
+    run(&[
+        "check",
+        "--target",
+        "wasm32-unknown-unknown",
+        "-p",
+        "pmcore",
+        "-p",
+        "pmsched",
+        "-p",
+        "pmformat",
+        "-p",
+        "pmsync",
+        "-p",
+        "projectcraft_engine",
+        "-p",
+        "projectcraft-ui-egui",
+        "-p",
+        "projectcraft-web",
+    ])
 }
 
 fn run(args: &[&str]) -> ExitCode {
@@ -51,9 +77,10 @@ fn layers() -> ExitCode {
             "pmcore" => 0,
             "pmsched" => 1,
             "pmformat" => 2,
+            "pmsync" => 3,
             "engine" | "projectcraft_engine" | "projectcraft-engine" => 5,
             "mcp" | "ui-egui" | "projectcraft_mcp" | "projectcraft-mcp" | "projectcraft_ui_egui" | "projectcraft-ui-egui" => 6,
-            n if n.ends_with("-cli") || n == "projectcraft" || n == "projectcraft-web" => 7,
+            n if n.ends_with("-cli") || n.ends_with("-sync") || n == "projectcraft" || n == "projectcraft-web" => 7,
             _ => return None,
         })
     };

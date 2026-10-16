@@ -44,15 +44,19 @@ Windows, macOS, Linux and BSD, and targets WebAssembly for the web.
   - `pmformat` (L2): `.projectcraft` native JSON, CSV, Jira JSON, MSPDI XML,
     Primavera P6 `.xer` import/export, headless SVG Gantt renderer and HTML
     report generator.
+  - `pmsync` (L3): role permissions (`Owner`, `Editor`, `Commenter`, `Viewer`,
+    `Guest`), content-addressed change DAG, `@mention` comments, and
+    post-merge semantic schedule conflict advisories.
   - `engine` (L5): command registry + panic-guarded `Session::execute`.
   - `mcp`, `ui-egui` (L6): JSON-RPC 2.0 stdio MCP server; egui Studio UI
     with Table, Gantt, Kanban Board, Resource Heatmap, and EVM/Risk views.
-  - `apps/*` (L7): `projectcraft-cli` and `projectcraft` desktop Studio +
-    TCP JSON-lines control channel.
+  - `apps/*` (L7): `projectcraft-cli`, `projectcraft` desktop Studio +
+    TCP JSON-lines control channel, `projectcraft-sync` collaboration relay,
+    and `projectcraft-web` (`wasm32-unknown-unknown`).
   - Nothing below L6 may depend on `egui`, `eframe`, `winit`, `wgpu`, or `rfd`.
 - **Everything is a command:** every user-visible mutation or query has a
   stable command id (`task.add`, `dep.add`, `schedule.run`,
   `resource.level`, `evm.compute`, …) reachable identically from the Studio
   UI, `projectcraft-cli --cmd`, the TCP control channel, and MCP.
 - **Quality gates** before every commit: `cargo xtask ci` (`fmt`, `clippy -D
-  warnings`, `test`, `layers`).
+  warnings`, `test`, `layers`, `wasm`).

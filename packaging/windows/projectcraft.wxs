@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="ProjectCraft"
+      Manufacturer="NibrasAz7"
+      Version="$(var.Version)"
+      UpgradeCode="9A28C631-67D4-478F-8A69-1C5E58F28B34"
+      Scope="perMachine"
+      Compressed="yes"
+      Language="1033">
+    <SummaryInformation Description="ProjectCraft project-management and scheduling suite" Manufacturer="NibrasAz7" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="A newer version of ProjectCraft is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="ProjectCraftIcon.ico" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="ProjectCraftIcon.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/NibrasAz7/ProjectsCraft" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/NibrasAz7/ProjectsCraft" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/NibrasAz7/ProjectsCraft/issues" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="ProjectCraft" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Property Id="DESKTOPSHORTCUT" Secure="yes" />
+    <Property Id="PREVIOUSDESKTOPSHORTCUT">
+      <RegistrySearch Id="PreviousDesktopShortcut" Root="HKCU" Key="Software\NibrasAz7\ProjectCraft"
+          Name="DesktopShortcut" Type="raw" />
+    </Property>
+    <SetProperty Id="DESKTOPSHORTCUT" Value="1" After="AppSearch" Sequence="first"
+        Condition="NOT DESKTOPSHORTCUT AND PREVIOUSDESKTOPSHORTCUT = &quot;1&quot;" />
+
+    <UIRef Id="ProjectCraftUI" />
+
+    <Feature Id="Main" Title="ProjectCraft" Level="1">
+      <ComponentGroupRef Id="ProjectCraftFiles" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="ProjectCraftFiles" Directory="INSTALLFOLDER">
+      <Component Id="ProjectCraftApp" Guid="A84E02B6-8904-4B57-978B-C92D11548C29">
+        <File Id="ProjectCraftExe" Source="$(var.BinDir)\projectcraft.exe" KeyPath="yes">
+          <Shortcut Id="StartMenuShortcut" Directory="ProgramMenuFolder" Name="ProjectCraft"
+              Description="ProjectCraft project-management and scheduling suite" WorkingDirectory="INSTALLFOLDER" Advertise="yes"
+              Icon="ProjectCraftIcon.ico" IconIndex="0" />
+        </File>
+
+        <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\projectcraft.exe" Value="[#ProjectCraftExe]" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\projectcraft.exe\shell\open\command" Value="&quot;[#ProjectCraftExe]&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.projectcraft\OpenWithProgids" Name="ProjectCraft.Document" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\ProjectCraft.Document\shell\open\command" Value="&quot;[#ProjectCraftExe]&quot; &quot;%1&quot;" Type="string" />
+      </Component>
+
+      <Component Id="ProjectCraftCli">
+        <File Id="ProjectCraftCliExe" Source="$(var.BinDir)\projectcraft-cli.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="ProjectCraftSync">
+        <File Id="ProjectCraftSyncExe" Source="$(var.BinDir)\projectcraft-sync.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="40749B7B-9A3A-47F5-89A8-86A87675983D"
+          Condition="DESKTOPSHORTCUT = &quot;1&quot;">
+        <Shortcut Id="DesktopShortcut" Name="ProjectCraft" Description="ProjectCraft project-management and scheduling suite"
+            Target="[INSTALLFOLDER]projectcraft.exe" WorkingDirectory="INSTALLFOLDER" Icon="ProjectCraftIcon.ico" IconIndex="0" />
+        <RegistryValue Root="HKCU" Key="Software\NibrasAz7\ProjectCraft" Name="DesktopShortcut"
+            Value="1" Type="string" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <UI Id="ProjectCraftUI">
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+
+      <Dialog Id="ShortcutsDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes"
+            Text="Choose where to start [ProductName] from." />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes"
+            Text="{\WixUI_Font_Title}Shortcuts" />
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+        <Control Id="StartMenuText" Type="Text" X="20" Y="60" Width="330" Height="15" NoPrefix="yes"
+            Text="[ProductName] will be added to the Start menu." />
+        <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="85" Width="330" Height="17"
+            Property="DESKTOPSHORTCUT" CheckBoxValue="1" Text="Create a &amp;desktop shortcut" />
+      </Dialog>
+
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="ShortcutsDlg" Condition="NOT Installed" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="Installed AND PATCH" />
+
+      <Publish Dialog="ShortcutsDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+      <Publish Dialog="ShortcutsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" />
+
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="ShortcutsDlg" Order="1" Condition="NOT Installed" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed AND NOT PATCH" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" Condition="Installed AND PATCH" />
+
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg" />
+
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
+
+      <Property Id="ARPNOMODIFY" Value="1" />
+    </UI>
+
+    <UIRef Id="WixUI_Common" />
+  </Fragment>
+</Wix>

@@ -1,0 +1,19 @@
+[package]
+name = "projectcraft-sync"
+description = "ProjectCraft L7 local-first collaboration relay: role-enforced change mailbox and snapshot server."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "projectcraft-sync"
+path = "src/main.rs"
+
+[dependencies]
+pmsync = { path = "../../crates/pmsync" }
+projectcraft_engine = { path = "../../crates/engine" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
