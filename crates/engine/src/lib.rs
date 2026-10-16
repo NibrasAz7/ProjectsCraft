@@ -508,7 +508,8 @@ fn req_u32(cmd: &str, p: &Json, key: &str) -> Result<u32, EngineError> {
 
 fn maybe_write_path(p: &Json, content: &str) -> Result<Option<String>, EngineError> {
     if let Some(path) = p.get("path").and_then(Json::as_str).filter(|s| !s.trim().is_empty()) {
-        std::fs::write(path, content).map_err(|e| EngineError::Io(format!("cannot write {path}: {e}")))?;
+        craft_atomic::atomic_write(std::path::Path::new(path), content.as_bytes())
+            .map_err(|e| EngineError::Io(format!("cannot write {path}: {e}")))?;
         Ok(Some(path.to_string()))
     } else {
         Ok(None)
@@ -574,7 +575,7 @@ fn cmd_project_open(s: &mut Session, p: &Json) -> Result<Json, EngineError> {
 fn cmd_project_save(s: &mut Session, p: &Json) -> Result<Json, EngineError> {
     let path = req_str("project.save", p, "path")?;
     let content = to_projectcraft_json(&s.project)?;
-    std::fs::write(path, &content).map_err(|e| EngineError::Io(format!("cannot write {path}: {e}")))?;
+    craft_atomic::atomic_write(std::path::Path::new(path), content.as_bytes()).map_err(|e| EngineError::Io(format!("cannot write {path}: {e}")))?;
     s.current_path = Some(path.to_string());
     Ok(json!({"path": path, "bytes": content.len()}))
 }

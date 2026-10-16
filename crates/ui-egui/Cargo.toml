@@ -13,12 +13,17 @@ name = "projectcraft_ui_egui"
 path = "src/lib.rs"
 
 [dependencies]
+craft-atomic = { workspace = true }
+craft-quit = { workspace = true }
+craft-settings = { workspace = true }
+craft-ui = { workspace = true }
 pmcore = { path = "../pmcore" }
 pmsched = { path = "../pmsched" }
 pmformat = { path = "../pmformat" }
 projectcraft_engine = { path = "../engine" }
 egui = "0.36"
 eframe = "0.36"
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 base64 = "0.22"
 png = "0.18"

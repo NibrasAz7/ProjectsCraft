@@ -36,3 +36,11 @@ is verified against `wasm32-unknown-unknown` via `cargo xtask wasm`.
    CPM rejects dependency cycles via `SchedError::CycleDetected`, resource
    levelling bounds passes, and `Session::execute` catches unwinds and
    restores the pre-call snapshot.
+4. **Shared Craft suite libraries (`storytold/craft-libs`).**
+   - `craft-atomic`: crash-safe atomic file replacement (`atomic_write`) for
+     `.projectcraft` saves, interop exports, and `projectcraft-sync` mailbox
+     persistence.
+   - `craft-settings`: `config.toml` storage (`ProjectCraftPrefs`) with
+     portable mode, automatic backup, and damaged-file recovery.
+   - `craft-quit`: platform-safe window close routing (`on_close_request`).
+   - `craft-ui`: `WidgetPalette` widget-state theme styling in `ui-egui`.

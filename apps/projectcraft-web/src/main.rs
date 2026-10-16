@@ -11,6 +11,10 @@ fn main() {
     use projectcraft_ui_egui::{ProjectApp, ProjectAppOptions};
     use wasm_bindgen::JsCast as _;
 
+    let _ = projectcraft_engine::Session::new;
+    let _ = egui::Color32::BLACK;
+    let _ = serde_json::Value::Null;
+
     wasm_bindgen_futures::spawn_local(async {
         let Some(document) = web_sys::window().and_then(|w| w.document()) else {
             return;
@@ -33,9 +37,5 @@ fn main() {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    let _ = projectcraft_ui_egui::Lens::Gantt;
-    let _ = projectcraft_engine::Session::new();
-    let _ = egui::Color32::BLACK;
-    let _ = serde_json::Value::Null;
     eprintln!("projectcraft-web targets wasm32-unknown-unknown; build with `trunk build --release` or check with `cargo xtask wasm`");
 }

@@ -51,6 +51,11 @@ are in place.
   `projectcraft-cli --cmd`, the TCP control server (`--control PORT`), and
   `projectcraft-cli mcp`; `projectcraft-web` compiles cleanly to
   `wasm32-unknown-unknown` (`cargo xtask wasm`).
+- **Suite infrastructure (`storytold/craft-libs`):** uses `craft-atomic` for
+  crash-safe atomic project and export writes, `craft-settings` for
+  persistent `config.toml` preferences with portable-mode and backup/recovery
+  support, `craft-quit` for platform-native window close lifecycle, and
+  `craft-ui` (`WidgetPalette`) for Studio widget-state styling.
 
 **Honest limitations (not yet implemented):**
 

@@ -9,6 +9,7 @@ license.workspace = true
 workspace = true
 
 [dependencies]
+craft-atomic = { workspace = true }
 pmcore = { path = "../pmcore" }
 pmsched = { path = "../pmsched" }
 pmformat = { path = "../pmformat" }

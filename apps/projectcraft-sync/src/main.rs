@@ -62,7 +62,7 @@ impl RelayState {
     fn persist(&self) {
         if let Some(p) = &self.store_path {
             if let Ok(txt) = serde_json::to_string_pretty(&self.bundle) {
-                let _ = std::fs::write(p, txt);
+                let _ = craft_atomic::atomic_write(p, txt.as_bytes());
             }
         }
     }

@@ -16,10 +16,65 @@ use std::path::PathBuf;
 use std::sync::mpsc::Receiver;
 
 use control::ControlRequest;
+use craft_settings::Settings;
+use craft_ui::theme::WidgetPalette;
 use pmcore::{DepKind, ItemKind, TaskStatus};
 use pmsched::{compute_baseline_variance, compute_evm, compute_sprint_burndown, compute_workload};
 use projectcraft_engine::Session;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value as Json};
+
+/// Persistent `config.toml` preferences managed via `craft-settings`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct ProjectCraftPrefs {
+    pub theme: String,
+    pub default_lens: String,
+    pub gantt_day_width: f32,
+}
+
+impl Default for ProjectCraftPrefs {
+    fn default() -> Self {
+        ProjectCraftPrefs { theme: "dark".to_string(), default_lens: "gantt".to_string(), gantt_day_width: 30.0 }
+    }
+}
+
+impl Settings for ProjectCraftPrefs {
+    const APP_ID: &'static str = "projectcraft";
+    const SCHEMA_VERSION: u32 = 1;
+}
+
+/// Apply ProjectCraft's dark or light widget palette using `craft_ui::theme::WidgetPalette`.
+pub fn apply_studio_theme(ctx: &egui::Context, mode: ThemeMode) {
+    let mut visuals = match mode {
+        ThemeMode::Dark => egui::Visuals::dark(),
+        ThemeMode::Light => egui::Visuals::light(),
+    };
+    let (palette, fg) = match mode {
+        ThemeMode::Dark => (
+            WidgetPalette {
+                noninteractive: egui::Color32::from_rgb(22, 27, 34),
+                inactive: egui::Color32::from_rgb(33, 38, 45),
+                hovered: egui::Color32::from_rgb(48, 54, 61),
+                active: egui::Color32::from_rgb(47, 129, 247),
+                open: egui::Color32::from_rgb(38, 44, 54),
+            },
+            egui::Stroke::new(1.0, egui::Color32::from_rgb(230, 237, 243)),
+        ),
+        ThemeMode::Light => (
+            WidgetPalette {
+                noninteractive: egui::Color32::from_rgb(246, 248, 250),
+                inactive: egui::Color32::from_rgb(234, 238, 242),
+                hovered: egui::Color32::from_rgb(208, 215, 222),
+                active: egui::Color32::from_rgb(9, 105, 218),
+                open: egui::Color32::from_rgb(220, 227, 233),
+            },
+            egui::Stroke::new(1.0, egui::Color32::from_rgb(31, 35, 40)),
+        ),
+    };
+    palette.apply_to(&mut visuals.widgets, egui::CornerRadius::same(4), fg);
+    ctx.set_visuals(visuals);
+}
 
 /// Active Studio lens over the project document.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -80,12 +135,24 @@ pub struct ProjectApp {
     pub level_log: Vec<String>,
     control_rx: Option<Receiver<ControlRequest>>,
     pub(crate) pending_shots: Vec<(ControlRequest, Option<String>)>,
+    #[cfg(not(target_arch = "wasm32"))]
+    settings_store: Option<craft_settings::SettingsStore<ProjectCraftPrefs>>,
 }
 
 impl ProjectApp {
     pub fn new(cc: &eframe::CreationContext<'_>, opts: ProjectAppOptions) -> Self {
-        cc.egui_ctx.set_visuals(egui::Visuals::dark());
-        Self::with_options(opts)
+        #[cfg_attr(target_arch = "wasm32", allow(unused_mut))]
+        let mut app = Self::with_options(opts);
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let (store, _report) = craft_settings::SettingsStore::<ProjectCraftPrefs>::open(craft_settings::Location::Auto);
+            let prefs = store.get();
+            app.theme = if prefs.theme.eq_ignore_ascii_case("light") { ThemeMode::Light } else { ThemeMode::Dark };
+            app.gantt_day_width = prefs.gantt_day_width.clamp(16.0, 64.0);
+            app.settings_store = Some(store);
+        }
+        apply_studio_theme(&cc.egui_ctx, app.theme);
+        app
     }
 
     pub fn with_options(opts: ProjectAppOptions) -> Self {
@@ -109,6 +176,8 @@ impl ProjectApp {
             level_log: Vec::new(),
             control_rx: opts.control_rx,
             pending_shots: Vec::new(),
+            #[cfg(not(target_arch = "wasm32"))]
+            settings_store: None,
         };
         if let Some(path) = opts.startup_file {
             let p_str = path.to_string_lossy().to_string();
@@ -154,7 +223,7 @@ impl ProjectApp {
                 "pngBase64": base64::engine::general_purpose::STANDARD.encode(&png),
             });
             if let Some(p) = path {
-                if let Err(e) = std::fs::write(&p, &png) {
+                if let Err(e) = craft_atomic::atomic_write(std::path::Path::new(&p), &png) {
                     out = json!({"ok": false, "error": format!("cannot write {p}: {e}")});
                 } else {
                     out["path"] = json!(p);
@@ -224,15 +293,19 @@ impl ProjectApp {
             };
             if ui.button(theme_lbl).clicked() {
                 self.theme = match self.theme {
-                    ThemeMode::Dark => {
-                        ctx.set_visuals(egui::Visuals::light());
-                        ThemeMode::Light
-                    }
-                    ThemeMode::Light => {
-                        ctx.set_visuals(egui::Visuals::dark());
-                        ThemeMode::Dark
-                    }
+                    ThemeMode::Dark => ThemeMode::Light,
+                    ThemeMode::Light => ThemeMode::Dark,
                 };
+                apply_studio_theme(ctx, self.theme);
+                #[cfg(not(target_arch = "wasm32"))]
+                if let Some(store) = &mut self.settings_store {
+                    let t_str = match self.theme {
+                        ThemeMode::Dark => "dark",
+                        ThemeMode::Light => "light",
+                    };
+                    store.update(|p| p.theme = t_str.to_string());
+                    let _ = store.flush();
+                }
             }
         });
     }
@@ -821,6 +894,16 @@ impl eframe::App for ProjectApp {
         self.flush_screenshots(ctx);
         if self.control_rx.is_some() {
             ctx.request_repaint_after(std::time::Duration::from_millis(250));
+        }
+        craft_quit::on_close_request(ctx);
+    }
+
+    fn on_exit(&mut self) {
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(store) = &mut self.settings_store {
+            let gw = self.gantt_day_width;
+            store.update(|p| p.gantt_day_width = gw);
+            let _ = store.flush();
         }
     }
 

@@ -13,6 +13,7 @@ name = "projectcraft-sync"
 path = "src/main.rs"
 
 [dependencies]
+craft-atomic = { workspace = true }
 pmsync = { path = "../../crates/pmsync" }
 projectcraft_engine = { path = "../../crates/engine" }
 serde = { version = "1", features = ["derive"] }

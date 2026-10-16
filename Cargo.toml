@@ -1,12 +1,19 @@
 [workspace]
 resolver = "2"
 members = ["crates/*", "apps/*", "xtask"]
+default-members = ["crates/*", "apps/projectcraft", "apps/projectcraft-cli", "apps/projectcraft-sync", "xtask"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/NibrasAz7/ProjectsCraft"
+
+[workspace.dependencies]
+craft-atomic = { git = "https://github.com/storytold/craft-libs", rev = "457a078809690994b22debdffb703ff36d3129df" }
+craft-settings = { git = "https://github.com/storytold/craft-libs", rev = "457a078809690994b22debdffb703ff36d3129df" }
+craft-quit = { git = "https://github.com/storytold/craft-libs", rev = "457a078809690994b22debdffb703ff36d3129df", features = ["egui"] }
+craft-ui = { git = "https://github.com/storytold/craft-libs", rev = "457a078809690994b22debdffb703ff36d3129df", features = ["serde"] }
 
 [workspace.lints.clippy]
 unwrap_used = "deny"
@@ -18,3 +25,6 @@ unreachable = "deny"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
+
+[profile.dev.package."*"]
+debug = "line-tables-only"
