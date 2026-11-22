@@ -4,6 +4,13 @@
 live in [`vision.md`](vision.md); known compatibility gaps are tracked in
 [`docs/gaps.md`](docs/gaps.md).
 
+**Polish order (demand-driven):** the ArtCraft Discord scan (Oct–Nov 2026)
+concentrates requests on the **Gantt lens first** — repeat MS-Project-class
+asks (`.iandark`, `ricky7714`, `therikky_`, `quiross`, `zalyzfun`,
+`fabioabibi`) — with **Kanban/sprint second** (`buggygamedev`'s Jira-class
+gap scan, `jol_duf`). This orders polish of the shipped lenses only; scope
+is unchanged. See [`plan/community-issues.md`](plan/community-issues.md).
+
 ## Milestones
 
 | Id | Scope | Status |

@@ -11,6 +11,16 @@ boards, resource workload heatmaps with priority-rule levelling, and
 ANSI/EIA-748 Earned Value Management (`PV`, `EV`, `AC`, `SV`, `CV`, `SPI`,
 `CPI`, `EAC`) with Monte Carlo schedule-risk simulation (`P10`/`P50`/`P80`/`P90`).
 
+## Why ProjectCraft
+
+**Agent-drivable PM.** Every user-visible action is a stable `engine`
+command id (`task.add`, `dep.add`, `schedule.run`, `resource.level`,
+`evm.compute`, `export.mspdi`, …) reachable identically from the Studio UI,
+`projectcraft-cli --cmd`, the TCP JSON-lines control channel
+(`projectcraft --control PORT`) and the bundled MCP stdio server
+(`projectcraft-cli mcp`). CLI and MCP agents can drive the whole product —
+the gap hosted tools like Notion, ClickUp and Linear leave open.
+
 ## Status
 
 **Alpha (M0–M6 landed)** — desktop Studio (`projectcraft`), headless CLI
